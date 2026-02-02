@@ -2,7 +2,8 @@
 
 	//ini_set('error_reporting', 'E_STRICT');
 
-	require_once "../vendor/autoload.php";
+	chdir(__DIR__);
+	require_once __DIR__ . "/../vendor/autoload.php";
 
 	if (file_exists(__DIR__ . '/../.env')) {
 		$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
