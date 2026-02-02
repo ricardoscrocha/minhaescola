@@ -15,17 +15,44 @@ class Connection
 			$db_name = $_ENV['DB_DATABASE'] ?? getenv('DB_DATABASE') ?: '';
 			$db_user = $_ENV['DB_USER'] ?? $_ENV['DB_USERNAME'] ?? getenv('DB_USER') ?: getenv('DB_USERNAME');
 			$db_password = $_ENV['DB_PASSWORD'] ?? getenv('DB_PASSWORD') ?: '';
+			$db_ssl_mode = strtolower((string) ($_ENV['DB_SSL_MODE'] ?? getenv('DB_SSL_MODE') ?: 'require'));
+			$db_ssl_ca = $_ENV['DB_SSL_CA'] ?? getenv('DB_SSL_CA') ?: '';
 
 			$dsn = "{$db_connection}:host={$db_host};port={$db_port};dbname={$db_name}";
+			$options = [];
 			
 			if ($db_connection === 'mysql') {
 				$dsn .= ";charset=utf8";
+
+				if ($db_ssl_mode !== 'disable' && defined('\PDO::MYSQL_ATTR_SSL_CA')) {
+					$caPath = $db_ssl_ca;
+
+					if ($caPath === '') {
+						$defaultCaPaths = [
+							'/etc/ssl/certs/ca-certificates.crt',
+							'/etc/ssl/cert.pem',
+							'/etc/pki/tls/certs/ca-bundle.crt'
+						];
+
+						foreach ($defaultCaPaths as $path) {
+							if (is_readable($path)) {
+								$caPath = $path;
+								break;
+							}
+						}
+					}
+
+					if ($caPath !== '') {
+						$options[\PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+					}
+				}
 			}
 
 			$conn = new \PDO(
 				$dsn,
 				$db_user,
-				$db_password
+				$db_password,
+				$options
 			);
 
 			return $conn;
