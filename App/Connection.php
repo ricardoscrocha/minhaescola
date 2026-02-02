@@ -24,12 +24,13 @@ class Connection
 			if ($db_connection === 'mysql') {
 				$dsn .= ";charset=utf8";
 
-				if ($db_ssl_mode !== 'disable' && defined('\PDO::MYSQL_ATTR_SSL_CA')) {
+				if ($db_ssl_mode !== 'disable') {
 					$caPath = $db_ssl_ca;
 
 					if ($caPath === '') {
 						$defaultCaPaths = [
 							'/etc/ssl/certs/ca-certificates.crt',
+							'/etc/ssl/certs/ca-bundle.crt',
 							'/etc/ssl/cert.pem',
 							'/etc/pki/tls/certs/ca-bundle.crt'
 						];
@@ -43,7 +44,14 @@ class Connection
 					}
 
 					if ($caPath !== '') {
-						$options[\PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+						if (defined('\PDO::MYSQL_ATTR_SSL_CA')) {
+							$options[\PDO::MYSQL_ATTR_SSL_CA] = $caPath;
+						}
+					}
+
+					// Force encrypted transport even when CA bundle path is unavailable.
+					if (defined('\PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+						$options[\PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = $db_ssl_mode === 'verify';
 					}
 				}
 			}
@@ -58,7 +66,8 @@ class Connection
 			return $conn;
 			
 		} catch (\PDOException $e) {
-			echo ($e->getMessage());
+			error_log('DB connection failed: ' . $e->getMessage());
+			return null;
 		}
 	}
 }
