@@ -2,9 +2,16 @@
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.1"
+    },
+    "api/node_modules.php": {
+      "runtime": "vercel-php@0.7.1"
     }
   },
   "routes": [
+    {
+      "src": "/node_modules/(.*)",
+      "dest": "/api/node_modules.php?path=$1"
+    },
     {
       "src": "/(assets|node_modules)/(.*)",
       "dest": "/public/$1/$2"
