@@ -1,11 +1,17 @@
 {
-    "functions": {
-        "runtime": "vercel-php@0.7.1"
+  "functions": {
+    "public/index.php": {
+      "runtime": "vercel-php@0.7.1"
+    }
+  },
+  "routes": [
+    {
+      "src": "/(assets|node_modules)/(.*)",
+      "dest": "/public/$1/$2"
     },
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "/public/index.php"
-        }
-    ]
+    {
+      "src": "/(.*)",
+      "dest": "/public/index.php"
+    }
+  ]
 }
